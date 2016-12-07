@@ -1,14 +1,43 @@
 
 function Music2() {
 	// Properties:
-	this.autoNext		= false;	// Auto play next.
-	this.shuffle		= false;	// Random mode.
-	this.repeat_list	= false;	// List loop.
-	this.repeat_song	= false;	// Single loop.
 	this.audio.preload	= 'none'	// Song preload.
 	this.audio.volume	= 0.25		// Song volume level.
 	
-	this.
+	
+	this.ctrls.progress
+		this.ctrls.progress.min = 0;
+		this.ctrls.progress.max = 1000;
+		this.ctrls.progress.step = 1;
+		this.ctrls.progress.defaultValue = 0;
+	this.ctrls.time_display
+		this.timeRemains	= false;	// Show time in pass or remain.
+	this.ctrls.volume
+		this.ctrls.volume.min = 0;
+		this.ctrls.volume.max = 100;
+		this.ctrls.volume.step = 1;
+		this.ctrls.volume.defaultValue = 25;
+		this.ctrls.volume.value = 25;
+		this.xVolume = this.ctrls.volume.value / 100;
+	this.ctrls.mute
+	this.ctrls.play
+	this.ctrls.pause
+	this.ctrls.stop
+	this.ctrls.last
+	this.ctrls.next
+	this.ctrls.rewind
+	this.ctrls.forward
+	
+	this.ctrls.auto_next
+		this.autoNext		= false;	// Auto play next.
+	this.ctrls.shuffle
+		this.shuffle		= false;	// Random mode.
+	this.ctrls.repeat_list
+		this.repeat_list	= false;	// List loop.
+	this.ctrls.repeat_song
+		this.repeat_song	= false;	// Single loop.
+	
+	
 	
 	this.isSmooth = false;		// Ctrl smooth.
 	this.timeFactor = 20;		// Using in smooth.
@@ -17,6 +46,8 @@ function Music2() {
 	this.info = new Array();
 	this.list = new Array();
 	this.audio = new Audio();
+	
+	
 	
 	// Function:
 	// this.set_track	= function () {}
@@ -81,8 +112,35 @@ function Music2() {
 		
 		return '.ERROR.'
 	}
+	this.s_c_r_a = function (smoothStep) {
+		var smoothStep = this.audio.volume / this.timeFactor;
+		if (this.audio.volume > 0) {
+			this.audio.volume = 
+			t0 = setTimeout('this.s_c_r_a()', );
+		}
+		else {
+			clearTimeout(t0);
+		}
+	}
+	this.s_c_r_b = function () {
+		if (this.audio.volume > this.volume) {
+			this.audio.volume = 
+			t0 = setTimeout('this.s_c_r_a()', );
+		}
+		else {
+			clearTimeout(t0);
+		}
+	}
+	this.s_c_g = function () {
+		if (this.audio.volume > 0) {
+			this.audio.volume = 
+			t0 = setTimeout('this.s_c_r_a()', );
+		}
+		else {
+			clearTimeout(t0);
+		}
+	}
 	this.smooth_ctrl = function (type) {
-		var smoothStep = (this.audio.volume * 100) / this.timeFactor;
 		if (this.isSmooth) {
 			switch (type) {
 				case 'pause':
@@ -123,25 +181,25 @@ function Music2() {
 		}
 	}
 
-	// this.mark		= function () {}
-	// this.locate		= function () {}
+	// this.mark			= function () {}
+	// this.locate			= function () {}
 	
-	// this.progress	= function () {}
-	// this.time_displa	= function () {}
-	// this.volume		= function () {}
-	// this.mute		= function () {}
-	// this.play		= function () {}
-	// this.pause		= function () {}
-	// this.stop		= function () {}
-	// this.last		= function () {}
-	// this.next		= function () {}
-	// this.rewind		= function () {}
-	// this.forward		= function () {}
-	
-	// this.auto_next	= function () {}
-	// this.shuffle		= function () {}
-	// this.repeat_list	= function () {}
-	// this.repeat_song	= function () {}
+	// this.progress		= function () {}
+	// this.time_display	= function () {}
+	// this.volume			= function () {}
+	// this.mute			= function () {}
+	// this.play			= function () {}
+	// this.pause			= function () {}
+	// this.stop			= function () {}
+	// this.last			= function () {}
+	// this.next			= function () {}
+	// this.rewind			= function () {}
+	// this.forward			= function () {}
+		
+	// this.auto_next		= function () {}
+	// this.shuffle			= function () {}
+	// this.repeat_list		= function () {}
+	// this.repeat_song		= function () {}
 }
 
 function Xctrl(
