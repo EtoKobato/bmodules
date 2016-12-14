@@ -4,53 +4,51 @@ function Music2() {
 	this.audio.preload	= 'none'	// Song preload.
 	this.audio.volume	= 0.25		// Song volume level.
 	
+	// Progress bar properties:
+	this.ctrls.progress.min				= 0;
+	this.ctrls.progress.max				= 1000;
+	this.ctrls.progress.step			= 1;
+	this.ctrls.progress.defaultValue	= 0;
 	
-	this.ctrls.progress
-		this.ctrls.progress.min = 0;
-		this.ctrls.progress.max = 1000;
-		this.ctrls.progress.step = 1;
-		this.ctrls.progress.defaultValue = 0;
-	this.ctrls.time_display
-		this.timeRemains	= false;	// Show time in pass or remain.
-	this.ctrls.volume
-		this.ctrls.volume.min = 0;
-		this.ctrls.volume.max = 100;
-		this.ctrls.volume.step = 1;
-		this.ctrls.volume.defaultValue = 25;
-		this.ctrls.volume.value = 25;
-		this.xVolume = this.ctrls.volume.value / 100;
-	this.ctrls.mute
-	this.ctrls.play
-	this.ctrls.pause
-	this.ctrls.stop
-	this.ctrls.last
-	this.ctrls.next
-	this.ctrls.rewind
-	this.ctrls.forward
+	// Show time in pass or remain:
+	this.timeRemains = false;
 	
-	this.ctrls.auto_next
-		this.autoNext		= false;	// Auto play next.
-	this.ctrls.shuffle
-		this.shuffle		= false;	// Random mode.
-	this.ctrls.repeat_list
-		this.repeat_list	= false;	// List loop.
-	this.ctrls.repeat_song
-		this.repeat_song	= false;	// Single loop.
+	// Volume bar properties:
+	this.ctrls.volume.min			= 0;
+	this.ctrls.volume.max			= 100;
+	this.ctrls.volume.step			= 1;
+	this.ctrls.volume.defaultValue	= 25;
+	this.ctrls.volume.value			= 25;
+	this.xVolume = this.ctrls.volume.value / 100;
 	
+	// Playback type:
+	this.autoNext		= false;	// Auto play next.
+	this.shuffle		= false;	// Random mode.
+	this.repeatList		= false;	// List loop.
+	this.audio.loop		= false;	// Single loop.
 	
+	// Smooth playback properties:
+	this.isSmooth		= false;	// Ctrl smooth.
+	this.smoothStep		= 0.01;		// Smooth step 
+	this.timeLength		= 500;		// (Default 500ms)Using in smooth.
 	
-	this.isSmooth = false;		// Ctrl smooth.
-	this.timeFactor = 20;		// Using in smooth.
-	
-	this.ctrls = new Object();
-	this.info = new Array();
-	this.list = new Array();
+	// Stores:
+	this.ctrls = new Object();	// Store controls.
+	this.info = new Array();	// Extend info for list.
+	this.list = new Array();	// Play list.
+	this.justPlay = ['id0', 'id1'];
 	this.audio = new Audio();
 	
+	// Progress refresh speed, NOT in Hz but ms.:
+	this.textRefreshPeriod		= 1000;	// Time text. this.ctrls.time_display0 this.ctrls.time_display1.
+	this.rangeRefreshPeriod		= 1000;	// Progress bar. this.ctrls.progress
 	
+	// lim random() recall times:
+	this.randomTimes = 0;
 	
 	// Function:
-	// this.set_track	= function () {}
+	
+	// 
 	this.add_track = function (id, title, performer, album, sndSRC, imgSRC) {
 		if (
 			id||title||performer||album||sndSRC||imgSRC == ''
@@ -58,7 +56,7 @@ function Music2() {
 			return 500;
 		}
 		this.info.push({
-			id			: id,
+			//id			: id,
 			title		: title,
 			performer	: performer,
 			album		: album,
@@ -72,22 +70,46 @@ function Music2() {
 	this.remove_track = function (id) {
 		var L = this.list.length;
 		var i = 0;
+		
 		for (i; i < L; i++) {
 			if (this.list[i].id == id) {
 				if (this.list[i].id == this.audio.id) {
 					this.ctrls.next.click();
-					playlist.splice(i, 1);
-					return 0;
 				}
-				else {
-					playlist.splice(i, 1);
-					return 0;
-				}
+				this.list.splice(i, 1);
+				this.info.splice(i, 1);
 			}
 		}
 		return 500;
 	}
-	this.get_track = function (id, part) {
+	this.set_track	= function (id) {
+		var L = this.list.length;
+		var i = 0;
+		
+		if (this.isSmooth && this.smoothStep > 0 && this.smoothStep <= 1) {
+			setTimeout("auto_next()", this.timeLength * this.smoothStep);
+		}
+		else {
+			auto_next();
+		}
+		
+		for (i; i < L; i++) {
+			if (this.list[i].id == id) {
+				this.audio.id = id;
+				
+				// Extra info:				
+				this.audio.title		= this.info[i].title;
+				this.audio.performer	= this.info[i].performer;
+				this.audio.album		= this.info[i].album;
+				this.audio.sndSRC		= this.info[i].sndSRC;
+				this.audio.imgSRC		= this.info[i].imgSRC;
+				
+				return 0;
+			}
+		}
+		return 500;
+	}
+	this.get_track = function (id, part = 'title') {
 		var L = this.list.length;
 		var i = 0;
 		
@@ -95,28 +117,153 @@ function Music2() {
 			if (this.list[i].id == id) {
 				switch (part) {
 					case 'title':
-						this.info[i].title;
+						return this.info[i].title;
 					case 'performer':
-						this.info[i].performer;
+						return this.info[i].performer;
 					case 'album':
-						this.info[i].album;
+						return this.info[i].album;
 					case 'sndSRC':
-						this.info[i].sndSRC;
+						return this.info[i].sndSRC;
 					case 'imgSRC':
-						this.info[i].imgSRC;
+						return this.info[i].imgSRC;
 					default:
 						return id;
 				}
 			}
 		}
 		
-		return '.ERROR.'
+		return 500;
 	}
-	this.s_c_r_a = function (smoothStep) {
-		var smoothStep = this.audio.volume / this.timeFactor;
+	this.exist_track = function (id) {
+		var L = this.list.length;
+		var i = 0;
+		
+		for (i; i < L; i++) {
+			if (this.list[i].id == id) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	this.next_track = function () {
+		var L = this.list.length;
+		var i = 0;
+		
+		if (L <= 0) return 500;
+		
+		this.smooth_ctrl('pause');
+		
+		if (this.isSmooth && this.smoothStep > 0 && this.smoothStep <= 1) {
+			if (L === 1) {
+				setTimeout('this.audio.currentTime = 0', this.timeLength * this.smoothStep);
+				setTimeout('this.remove_track(this.audio.id)', this.timeLength * this.smoothStep);
+			}
+			
+			if (this.repeatList) {
+				if (this.shuffle) {
+					// List loop:
+					// Random play:
+					
+					setTimeout("this.set_track(this.list[this.random()].id)", this.timeLength * this.smoothStep);
+					// Done;
+				}
+				else {
+					// List loop:
+					// Liner play:
+					for (i; i < L ; i++) {
+						if (this.list[i].id == this.audio.id) {
+							if (i + 1 == L) {
+								setTimeout("this.set_track(this.list[0].id)", this.timeLength * this.smoothStep);
+							}
+							else {
+								setTimeout("this.set_track(this.list[" + i + " + 1].id)", this.timeLength * this.smoothStep);
+							}
+						}
+					}
+					// Done;
+				}
+			}
+			else {
+				if (this.shuffle) {
+					// Once play:
+					// Random play:
+					setTimeout("this.set_track(this.list[this.random()].id)", this.timeLength * this.smoothStep);
+				}
+				else {
+					// Once play:
+					// Liner play:
+					for (i ; i < L ; i++) {
+						if (this.list[i].id == this.audio.id) {
+							if (i + 1 == L) {
+								setTimeout("this.audio.currentTime = 0", this.timeLength * this.smoothStep);
+								return;
+							}
+							setTimeout("this.set_track(this.list[" + i + " + 1].id)", this.timeLength * this.smoothStep);
+						}
+					}
+				}
+			}
+
+			t = setTimeout("this.smooth_ctrl('play')", this.timeLength * this.smoothStep);
+		}
+		else {
+			if (L === 1) {
+				this.audio.currentTime = 0;
+				this.remove_track(this.audio.id);
+			}
+			if (this.repeatList) {
+				if (this.shuffle) {
+					// List loop:
+					// Random play:
+					
+					this.set_track(this.list[this.random()].id);
+					// Done;
+				}
+				else {
+					// List loop:
+					// Liner play:
+					for (i; i < L ; i++) {
+						if (this.list[i].id == this.audio.id) {
+							if (i + 1 == L) {
+								this.set_track(this.list[0].id);
+							}
+							else {
+								this.set_track(this.list[i + 1].id);
+							}
+						}
+					}
+					// Done;
+				}
+			}
+			else {
+				if (this.shuffle) {
+					// Once play:
+					// Random play:
+					this.set_track(this.list[this.random()].id);
+				}
+				else {
+					// Once play:
+					// Liner play:
+					for (i ; i < L ; i++) {
+						if (this.list[i].id == this.audio.id) {
+							if (i + 1 == L) {
+								this.audio.currentTime = 0;
+								return;
+							}
+							this.set_track(this.list[i + 1].id);
+						}
+					}
+				}
+			}
+			this.smooth_ctrl('play');
+		}
+		
+	}
+	this.s_c_r_a = function () {
 		if (this.audio.volume > 0) {
-			this.audio.volume = 
-			t0 = setTimeout('this.s_c_r_a()', );
+			this.audio.volume -= this.smoothStep;
+			t0 = setTimeout('this.s_c_r_a()', this.timeLength * this.smoothStep);
 		}
 		else {
 			clearTimeout(t0);
@@ -124,8 +271,8 @@ function Music2() {
 	}
 	this.s_c_r_b = function () {
 		if (this.audio.volume > this.volume) {
-			this.audio.volume = 
-			t0 = setTimeout('this.s_c_r_a()', );
+			this.audio.volume -= this.smoothStep;
+			t0 = setTimeout('this.s_c_r_b()', this.timeLength * this.smoothStep);
 		}
 		else {
 			clearTimeout(t0);
@@ -133,59 +280,100 @@ function Music2() {
 	}
 	this.s_c_g = function () {
 		if (this.audio.volume > 0) {
-			this.audio.volume = 
-			t0 = setTimeout('this.s_c_r_a()', );
+			this.audio.volume += this.smoothStep;
+			t0 = setTimeout('this.s_c_r_b()', this.timeLength * this.smoothStep);
 		}
 		else {
 			clearTimeout(t0);
 		}
 	}
 	this.smooth_ctrl = function (type) {
-		if (this.isSmooth) {
+		if (this.isSmooth && this.smoothStep > 0 && this.smoothStep <= 1) {
 			switch (type) {
 				case 'pause':
-					reduce();
-					t = setTimeout("mainAudio.pause()", Math.round((xtime * rangeValue) / 0.01));
+					s_c_r_a();
+					t = setTimeout("this.audio.pause()", this.timeLength);
 				break;
 				case 'play':
-					mainAudio.volume = 0;
-					mainAudio.play();
-					gain();
+					this.audio.volume = 0;
+					this.audio.play();
+					s_c_g();
 				break;
 				case 'adjust':
-					if (mainAudio.volume > rangeValue) {			// REDUCE
-						reducex();
+					if (this.audio.volume > this.xVolume) {			// REDUCE
+						s_c_r_b();
 					}
-					else if (mainAudio.volume < rangeValue) {		// GAIN
-						gain();
+					else if (this.audio.volume < this.xVolume) {		// GAIN
+						s_c_g();
 					}
 					else {
-						mainAudio.volume = rangeValue;
+						this.audio.volume = this.xVolume;
 					}
 				break;
 			}
-			t = setTimeout("range1.max = parseInt(Math.round(mainAudio.duration) * 2)", Math.round((xtime * rangeValue) / 0.01) + 1500);
+			t = setTimeout("this.ctrls.progress.max = parseInt(Math.round(this.audio.duration) * 2)", this.timeLength);
+			return 0;
 		}
-		else {
-			switch (type) {
-				case 'pause':
-					mainAudio.pause();
-				break;
-				case 'play':
-					mainAudio.play();
-				break;
-				case 'adjust':
-					mainAudio.volume = rangeValue;
-				break;
-			}
+		switch (type) {
+			case 'pause':
+				this.audio.pause();
+			break;
+			case 'play':
+				this.audio.play();
+			break;
+			case 'adjust':
+				this.audio.volume = this.xVolume;
+			break;
 		}
+		this.ctrls.progress.max = parseInt(Math.round(this.audio.duration) * 2);
+		return 0;
 	}
 
 	// this.mark			= function () {}
 	// this.locate			= function () {}
 	
 	// this.progress		= function () {}
-	// this.time_display	= function () {}
+	this.time_display = function () {
+		clearInterval(i0);
+		clearInterval(i1);
+		clearInterval(i2);
+		if (timeRemains) {
+			i0 = setInterval("$(this.ctrls.time_display0).html(this.td_group_time(2))", this.textRefreshPeriod);
+		}
+		else {
+			i0 = setInterval("$(this.ctrls.time_display0).html(this.td_group_time(1))", this.textRefreshPeriod);
+			
+		}
+		i1 = setInterval("$(this.ctrls.time_display1).html(this.td_group_time(0))", this.textRefreshPeriod);
+		i2 = setInterval("this.ctrls.progress.value = parseInt((this.audio.currentTime / this.audio.duration) * this.ctrls.progress.max)", this.rangeRefreshPeriod);
+	}
+	this.td_group_time = function (type) {
+		var min = '--';
+		var sec = '--';
+		switch (type) {
+			case 0:
+			// The duration:
+			min = parseInt(this.audio.duration / 60).toString();
+			sec = parseInt(this.audio.duration % 60).toString();
+			break;
+			
+			case 1:
+			// The current:
+			min = parseInt(this.audio.currentTime / 60).toString();
+			sec = parseInt(this.audio.currentTime % 60).toString();
+			break;
+			
+			case 2:
+			// The passed:
+			min = parseInt((this.audio.duration - this.audio.currentTime) / 60).toString();
+			sec = parseInt((this.audio.duration - this.audio.currentTime) % 60).toString();
+			break;
+		}
+		if (!min.length == 2) min = '0' + min;
+		if (!sec.length == 2) tmp = '0' + sec;
+		return min + ':' + sec;
+	}
+	
 	// this.volume			= function () {}
 	// this.mute			= function () {}
 	// this.play			= function () {}
@@ -196,13 +384,75 @@ function Music2() {
 	// this.rewind			= function () {}
 	// this.forward			= function () {}
 		
-	// this.auto_next		= function () {}
-	// this.shuffle			= function () {}
-	// this.repeat_list		= function () {}
-	// this.repeat_song		= function () {}
+	this.auto_next = function () {
+		if (this.autoNext) {
+			$(this.audio).on('ended', function) {
+				$
+			}
+		}
+		else {
+			$(this.audio).off('ended');
+		}
+	}
+	this.random = function () {
+		var L = this.list.length;
+		var i = 0;
+		
+		xRandom = Math.floor(Math.random() * L);
+		
+		for (i; i < L; i++) {
+			if (
+				(this.list[xRandom].id == this.audio.id && L > 1) ||
+				this.justPlay[0] == this.audio.id ||
+				this.justPlay[1] == this.audio.id
+			) {
+				this.randomTimes++;
+				if (this.randomTimes > 2) {
+					this.randomTimes = 0;
+					return xRandom;
+				}
+				this.random();
+			}
+		}
+		this.randomTimes = 0;
+		return xRandom;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//  Event listener:
+	this.ctrls.progress.on('change', function () {
+		this.smooth_ctrl('pause');
+		this.audio.currentTime = parseInt((this.ctrls.progress.value / this.ctrls.progress.max) * this.audio.duration);
+	});
+	$('#progressLength').on('mouseenter', function (e) {
+		var e = event || window.event;
+		$('<p>' + ($(e.target)[0].value * 10) +  '|' + '' + '</p>').remove().insertAfter($(this));
+		
+		$(this).parent().find('p').css({
+			'position': 'fixed',
+			'top' : scrollY + e.clientY - 15 + 'px',
+			'left' : scrollX + e.clientX + 'px'
+		});
+		
+	});
+	$('#progressLength').on('mouseleave', function () {
+		$(this).parent().find('p').remove();
+	});
 }
 
-function Xctrl(
+function set_ctrl(
+	c0,
 	c1,
 	c2,
 	c3,
@@ -219,21 +469,22 @@ function Xctrl(
 	c14,
 	c15
 ) {
-	Music2.ctrls = {
+	c0.ctrls = {
 		progress		: c1,
-		time_display	: c2,
-		volume			: c3,
-		mute			: c4,
-		play			: c5,
-		pause			: c6,
-		stop			: c7,
-		last			: c8,
-		next			: c9,
-		rewind			: c10,
-		forward			: c11,
-		auto_next		: c12,
-		shuffle			: c13,
-		repeat_list		: c14,
-		repeat_song		: c15
+		time_display0	: c2,
+		time_display1	: c3,
+		volume			: c4,
+		mute			: c5,
+		play			: c6,
+		pause			: c7,
+		stop			: c8,
+		last			: c9,
+		next			: c10,
+		rewind			: c11,
+		forward			: c12,
+		auto_next		: c13,
+		shuffle			: c14,
+		repeat_list		: c15,
+		repeat_song		: c16
 	}
 }
