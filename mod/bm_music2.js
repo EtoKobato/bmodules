@@ -39,7 +39,7 @@ function Music2() {
 	this.justPlay = ['id0', 'id1'];
 	this.audio = new Audio();
 	
-	// Progress refresh speed, NOT in Hz but ms.:
+	// Progress refresh speed, NOT in Hz but ms:
 	this.textRefreshPeriod		= 1000;	// Time text. this.ctrls.time_display0 this.ctrls.time_display1.
 	this.rangeRefreshPeriod		= 1000;	// Progress bar. this.ctrls.progress
 	
@@ -48,7 +48,7 @@ function Music2() {
 	
 	// Function:
 	
-	// 
+	// Add track to playlist and information:
 	this.add_track = function (id, title, performer, album, sndSRC, imgSRC) {
 		if (
 			id||title||performer||album||sndSRC||imgSRC == ''
@@ -67,6 +67,7 @@ function Music2() {
 		
 		return 0;
 	}
+	// Remove track:
 	this.remove_track = function (id) {
 		var L = this.list.length;
 		var i = 0;
@@ -82,6 +83,7 @@ function Music2() {
 		}
 		return 500;
 	}
+	// Append all the information to the audio element:
 	this.set_track	= function (id) {
 		var L = this.list.length;
 		var i = 0;
@@ -109,6 +111,7 @@ function Music2() {
 		}
 		return 500;
 	}
+	// Withdraw any one information from two array:
 	this.get_track = function (id, part = 'title') {
 		var L = this.list.length;
 		var i = 0;
@@ -134,6 +137,7 @@ function Music2() {
 		
 		return 500;
 	}
+	// Verify if the track already in the list:
 	this.exist_track = function (id) {
 		var L = this.list.length;
 		var i = 0;
@@ -146,6 +150,8 @@ function Music2() {
 		
 		return false;
 	}
+	// Goto and play next track (if it exist), smart action will takes.
+	// With play controllers. 
 	this.next_track = function () {
 		var L = this.list.length;
 		var i = 0;
@@ -260,6 +266,7 @@ function Music2() {
 		}
 		
 	}
+	// Simple as Smooth Control Reduce A:
 	this.s_c_r_a = function () {
 		if (this.audio.volume > 0) {
 			this.audio.volume -= this.smoothStep;
@@ -269,6 +276,7 @@ function Music2() {
 			clearTimeout(t0);
 		}
 	}
+	// Simple as Smooth Control Reduce B:
 	this.s_c_r_b = function () {
 		if (this.audio.volume > this.volume) {
 			this.audio.volume -= this.smoothStep;
@@ -278,6 +286,7 @@ function Music2() {
 			clearTimeout(t0);
 		}
 	}
+	// Simple as Smooth Control Gain A:
 	this.s_c_g = function () {
 		if (this.audio.volume > 0) {
 			this.audio.volume += this.smoothStep;
@@ -287,6 +296,7 @@ function Music2() {
 			clearTimeout(t0);
 		}
 	}
+	// If setting value the isSmooth configured to true then smooth play back will be used, or not:
 	this.smooth_ctrl = function (type) {
 		if (this.isSmooth && this.smoothStep > 0 && this.smoothStep <= 1) {
 			switch (type) {
@@ -333,20 +343,24 @@ function Music2() {
 	// this.locate			= function () {}
 	
 	// this.progress		= function () {}
-	this.time_display = function () {
+	// Display time in mm:ss, using customized values:
+	this.time_display = function (start) {
 		clearInterval(i0);
 		clearInterval(i1);
 		clearInterval(i2);
-		if (timeRemains) {
-			i0 = setInterval("$(this.ctrls.time_display0).html(this.td_group_time(2))", this.textRefreshPeriod);
+		if (start) {
+			if (timeRemains) {
+				i0 = setInterval("$(this.ctrls.time_display0).html(this.td_group_time(2))", this.textRefreshPeriod);
+			}
+			else {
+				i0 = setInterval("$(this.ctrls.time_display0).html(this.td_group_time(1))", this.textRefreshPeriod);
+				
+			}
+			i1 = setInterval("$(this.ctrls.time_display1).html(this.td_group_time(0))", this.textRefreshPeriod);
+			i2 = setInterval("this.ctrls.progress.value = parseInt((this.audio.currentTime / this.audio.duration) * this.ctrls.progress.max)", this.rangeRefreshPeriod);
 		}
-		else {
-			i0 = setInterval("$(this.ctrls.time_display0).html(this.td_group_time(1))", this.textRefreshPeriod);
-			
-		}
-		i1 = setInterval("$(this.ctrls.time_display1).html(this.td_group_time(0))", this.textRefreshPeriod);
-		i2 = setInterval("this.ctrls.progress.value = parseInt((this.audio.currentTime / this.audio.duration) * this.ctrls.progress.max)", this.rangeRefreshPeriod);
 	}
+	// Group time s to mm:ss
 	this.td_group_time = function (type) {
 		var min = '--';
 		var sec = '--';
@@ -376,14 +390,14 @@ function Music2() {
 	
 	// this.volume			= function () {}
 	// this.mute			= function () {}
-	// this.play			= function () {}
+	// this.play				= function () {}
 	// this.pause			= function () {}
-	// this.stop			= function () {}
-	// this.last			= function () {}
-	// this.next			= function () {}
+	// this.stop				= function () {}
+	// this.last				= function () {}
+	// this.next				= function () {}
 	// this.rewind			= function () {}
-	// this.forward			= function () {}
-		
+	// this.forward		= function () {}
+	// Auto play next.
 	this.auto_next = function () {
 		if (this.autoNext) {
 			$(this.audio).on('ended', function) {
@@ -394,6 +408,7 @@ function Music2() {
 			$(this.audio).off('ended');
 		}
 	}
+	// This is the RNG Random Number Generator:
 	this.random = function () {
 		var L = this.list.length;
 		var i = 0;
